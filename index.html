@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checklist –ServiceNow</title>
+    <title>Checklist – ServiceNow </title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.3.2/docx.min.js"></script>
     <style>
@@ -43,7 +43,7 @@
             border-radius: 8px;
             font-size: 14px;
             background: #f9fafb;
-            flex: 1 1 200px;
+            flex: 1 1 180px;
         }
         .toolbar input:focus, .toolbar select:focus {
             outline: none;
@@ -79,6 +79,7 @@
         .btn-servicenow:hover { background: #1b4332; }
         .btn-image { background: #f59e0b; color: #fff; }
         .btn-image:hover { background: #d97706; }
+        .btn-sm { padding: 4px 10px; font-size: 12px; }
 
         .stats {
             display: flex;
@@ -157,7 +158,6 @@
         }
         .btn-remove:hover { color: #ef4444; }
 
-        /* Imagens */
         .item-images {
             display: flex;
             flex-wrap: wrap;
@@ -303,7 +303,7 @@
         </div>
     </div>
 
-    <!-- Formulário rápido para adicionar -->
+    <!-- Formulário rápido -->
     <div class="add-item-form">
         <input type="text" id="newItemDesc" placeholder="Descrição do item...">
         <input type="text" id="newItemCategory" placeholder="Categoria (ex: Artigo, Categoria)">
@@ -346,7 +346,7 @@
     const projectInput = document.getElementById('projectName');
 
     // ============================================================
-    //  PERSISTÊNCIA
+    //  PERSISTÊNCIA (localStorage)
     // ============================================================
     function saveState() {
         const data = {
@@ -440,7 +440,7 @@
     }
 
     // ============================================================
-    //  OPERAÇÕES
+    //  OPERAÇÕES BÁSICAS
     // ============================================================
     function addItem() {
         const descInput = document.getElementById('newItemDesc');
@@ -501,11 +501,18 @@
         const form = document.getElementById(`imgForm_${itemId}`);
         if (form.style.display === 'none') {
             form.style.display = 'flex';
-            // Ativa o input file
             const fileInput = form.querySelector('input[type="file"]');
             fileInput.click();
         } else {
             form.style.display = 'none';
+            // Limpa pendências
+            delete pendingImageData[itemId];
+            const preview = document.getElementById(`preview_${itemId}`);
+            if (preview) preview.remove();
+            const fileInput = form.querySelector('input[type="file"]');
+            if (fileInput) fileInput.value = '';
+            const obsInput = document.getElementById(`imgObs_${itemId}`);
+            if (obsInput) obsInput.value = '';
         }
     }
 
@@ -518,15 +525,15 @@
                 data: e.target.result,
                 name: file.name
             };
-            // Mostra prévia
+            // Prévia
             const form = document.getElementById(`imgForm_${itemId}`);
-            const preview = document.createElement('div');
-            preview.id = `preview_${itemId}`;
+            let preview = document.getElementById(`preview_${itemId}`);
+            if (!preview) {
+                preview = document.createElement('div');
+                preview.id = `preview_${itemId}`;
+                form.prepend(preview);
+            }
             preview.innerHTML = `<img src="${e.target.result}" style="max-height:60px; border-radius:4px; border:1px solid #ddd;">`;
-            // Remove prévia antiga
-            const old = document.getElementById(`preview_${itemId}`);
-            if (old) old.remove();
-            form.prepend(preview);
         };
         reader.readAsDataURL(file);
     }
@@ -548,7 +555,6 @@
             caption: caption + (obs ? ` - ${obs}` : '')
         });
 
-        // Limpa
         delete pendingImageData[itemId];
         const form = document.getElementById(`imgForm_${itemId}`);
         form.style.display = 'none';
@@ -557,7 +563,6 @@
         const fileInput = form.querySelector('input[type="file"]');
         fileInput.value = '';
         if (obsInput) obsInput.value = '';
-
         render();
     }
 
@@ -582,7 +587,7 @@
     }
 
     // ============================================================
-    //  EXEMPLO – ServiceNow Knowledge Center
+    //  EXEMPLO SERVICE NOW
     // ============================================================
     function loadServiceNowExample() {
         items = [
@@ -601,7 +606,7 @@
     }
 
     // ============================================================
-    //  EXPORTAÇÃO WORD (DOCX)
+    //  EXPORTAÇÃO WORD (DOCX) COM IMAGENS
     // ============================================================
     async function exportWord() {
         if (items.length === 0) { alert('Adicione itens ao checklist antes de exportar.'); return; }
@@ -609,7 +614,7 @@
         const title = titleInput.value || 'Checklist ServiceNow';
         const project = projectInput.value || '';
 
-        const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, BorderStyle, ImageRun, WidthType, HeightType } = docx;
+        const { Document, Packer, Paragraph, TextRun, AlignmentType, Table, TableRow, TableCell, BorderStyle, ImageRun } = docx;
 
         const doc = new Document({
             sections: [{
@@ -632,7 +637,6 @@
             }]
         });
 
-        // Para cada item, criar uma linha na tabela com as imagens em uma célula adicional
         const rows = [];
         // Cabeçalho
         rows.push(new TableRow({
@@ -648,12 +652,10 @@
 
         for (const [idx, item] of items.entries()) {
             const statusText = item.status === 'done' ? '✅ Concluído' : '⏳ Pendente';
-            // Célula de imagens: tentar embutir imagens (limitado a 2 por linha)
             let imageParagraphs = [];
             const images = item.images || [];
             for (const img of images) {
                 try {
-                    // Converter base64 para Uint8Array
                     const base64 = img.data.split(',')[1] || img.data;
                     const binaryString = atob(base64);
                     const bytes = new Uint8Array(binaryString.length);
@@ -732,7 +734,7 @@
     }
 
     // ============================================================
-    //  EXPORTAÇÃO PDF (com imagens)
+    //  EXPORTAÇÃO PDF COM IMAGENS
     // ============================================================
     function exportPDF() {
         if (items.length === 0) { alert('Adicione itens ao checklist antes de exportar.'); return; }
