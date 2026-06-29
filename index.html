@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checklist – ServiceNow </title>
+    <title>Checklist – ServiceNow Knowledge Center</title>
+    <!-- Carregamento das bibliotecas com CDNs confiáveis -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.3.2/docx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.3.2/build/index.min.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
         body { background:#f0f2f5; padding:20px; min-height:100vh; display:flex; justify-content:center; }
@@ -86,7 +87,7 @@
 </head>
 <body>
 <div class="container" id="app">
-    <h1>📋 Checklist – ServiceNow Center</h1>
+    <h1>📋 Checklist – ServiceNow Knowledge Center</h1>
     <p class="subtitle">Verificação com imagens (antes/depois) – compartilhe em Word ou PDF</p>
 
     <div class="toolbar">
@@ -378,11 +379,17 @@
     }
 
     // ============================================================
-    //  EXPORTAÇÃO WORD (DOCX) COM IMAGENS EMBUTIDAS
+    //  EXPORTAÇÃO WORD (DOCX) – CORRIGIDA
     // ============================================================
     async function exportWord() {
         if (items.length === 0) {
             alert('Adicione itens ao checklist antes de exportar.');
+            return;
+        }
+
+        // Verifica se a biblioteca docx está disponível
+        if (typeof docx === 'undefined') {
+            alert('A biblioteca docx não foi carregada. Verifique sua conexão com a internet e recarregue a página.');
             return;
         }
 
@@ -448,7 +455,6 @@
                 let imageParagraphs = [];
                 const images = item.images || [];
 
-                // Verifica se há imagens e tenta embuti-las
                 if (images.length === 0) {
                     imageParagraphs.push(new Paragraph({
                         children: [new TextRun({ text: '—', size: 10, color: '999999' })],
@@ -457,7 +463,6 @@
                 } else {
                     for (const img of images) {
                         try {
-                            // Converte base64 para Uint8Array
                             const base64Data = img.data.split(',')[1] || img.data;
                             const binaryString = atob(base64Data);
                             const bytes = new Uint8Array(binaryString.length);
@@ -465,7 +470,6 @@
                                 bytes[i] = binaryString.charCodeAt(i);
                             }
 
-                            // Determina o tipo de imagem
                             let imageType = 'jpeg';
                             if (img.data.startsWith('data:image/png')) imageType = 'png';
                             else if (img.data.startsWith('data:image/gif')) imageType = 'gif';
@@ -541,7 +545,7 @@
 
         } catch (error) {
             console.error('Erro na exportação Word:', error);
-            alert('Erro ao gerar o arquivo Word. Verifique o console para mais detalhes.');
+            alert('Erro ao gerar o arquivo Word: ' + error.message + '\nVerifique o console para mais detalhes.');
         }
     }
 
