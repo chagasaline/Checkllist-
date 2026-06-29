@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checklist – ServiceNow Knowledge Center</title>
+    <title>Checklist –ServiceNow</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.3.2/docx.min.js"></script>
     <style>
@@ -21,23 +21,15 @@
             justify-content: center;
         }
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             width: 100%;
             background: #fff;
             border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.08);
             padding: 30px;
         }
-        h1 {
-            font-size: 24px;
-            color: #1a1a2e;
-            margin-bottom: 4px;
-        }
-        .subtitle {
-            color: #6b7280;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
+        h1 { font-size: 24px; color: #1a1a2e; margin-bottom: 4px; }
+        .subtitle { color: #6b7280; font-size: 14px; margin-bottom: 20px; }
         .toolbar {
             display: flex;
             flex-wrap: wrap;
@@ -85,6 +77,8 @@
         .btn-pdf:hover { background: #b91c1c; }
         .btn-servicenow { background: #2d6a4f; color: #fff; }
         .btn-servicenow:hover { background: #1b4332; }
+        .btn-image { background: #f59e0b; color: #fff; }
+        .btn-image:hover { background: #d97706; }
 
         .stats {
             display: flex;
@@ -96,55 +90,44 @@
             margin-bottom: 20px;
             border: 1px solid #e5e7eb;
         }
-        .stats span {
-            font-size: 14px;
-            color: #4b5563;
-        }
-        .stats strong {
-            color: #1a1a2e;
-        }
+        .stats span { font-size: 14px; color: #4b5563; }
+        .stats strong { color: #1a1a2e; }
 
         .checklist {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
             margin-top: 10px;
         }
         .checklist-item {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
+            flex-direction: column;
+            padding: 12px 16px;
             background: #f9fafb;
-            border-radius: 10px;
+            border-radius: 12px;
             border: 1px solid #e5e7eb;
             transition: all 0.15s;
+            gap: 8px;
         }
-        .checklist-item:hover {
-            background: #f3f4f6;
+        .checklist-item:hover { background: #f3f4f6; }
+        .checklist-item.done { background: #f0fdf4; border-color: #bbf7d0; }
+        .checklist-item.done .item-text { text-decoration: line-through; color: #6b7280; }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
-        .checklist-item.done {
-            background: #f0fdf4;
-            border-color: #bbf7d0;
-        }
-        .checklist-item.done .item-text {
-            text-decoration: line-through;
-            color: #6b7280;
-        }
-        .checklist-item input[type="checkbox"] {
+        .item-row input[type="checkbox"] {
             width: 20px;
             height: 20px;
             accent-color: #22c55e;
             cursor: pointer;
             flex-shrink: 0;
         }
-        .checklist-item .item-text {
-            flex: 1;
-            font-size: 15px;
-            color: #1f2937;
-            word-break: break-word;
-        }
-        .checklist-item .item-category {
+        .item-text { flex: 1; font-size: 15px; color: #1f2937; }
+        .item-category {
             font-size: 11px;
             background: #e5e7eb;
             padding: 2px 10px;
@@ -152,7 +135,7 @@
             color: #4b5563;
             white-space: nowrap;
         }
-        .checklist-item .item-obs {
+        .item-obs {
             font-size: 13px;
             color: #6b7280;
             background: #fff;
@@ -160,13 +143,10 @@
             border-radius: 6px;
             padding: 4px 10px;
             min-width: 120px;
-            max-width: 200px;
+            flex: 1 1 150px;
         }
-        .checklist-item .item-obs:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-        .checklist-item .btn-remove {
+        .item-obs:focus { outline: none; border-color: #3b82f6; }
+        .btn-remove {
             background: none;
             border: none;
             color: #9ca3af;
@@ -175,8 +155,67 @@
             padding: 0 4px;
             transition: color 0.2s;
         }
-        .checklist-item .btn-remove:hover {
-            color: #ef4444;
+        .btn-remove:hover { color: #ef4444; }
+
+        /* Imagens */
+        .item-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 6px 0 0 32px;
+        }
+        .image-card {
+            position: relative;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 6px;
+            background: #fff;
+            max-width: 120px;
+        }
+        .image-card img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+        .image-card .caption {
+            font-size: 10px;
+            color: #4b5563;
+            text-align: center;
+            margin-top: 2px;
+        }
+        .image-card .btn-remove-img {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .image-card .btn-remove-img:hover { background: #dc2626; }
+
+        .add-image-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            padding-left: 32px;
+        }
+        .add-image-form input[type="file"] { display: none; }
+        .add-image-form select, .add-image-form input[type="text"] {
+            padding: 4px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+            background: #fff;
         }
 
         .add-item-form {
@@ -205,10 +244,7 @@
             padding: 40px 20px;
             color: #9ca3af;
         }
-        .empty-state .icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
+        .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
 
         .footer-actions {
             display: flex;
@@ -228,18 +264,20 @@
 
         @media (max-width: 640px) {
             .container { padding: 16px; }
-            .checklist-item { flex-wrap: wrap; }
-            .checklist-item .item-obs { min-width: 100px; max-width: 100%; flex: 1; }
+            .item-row { flex-wrap: wrap; }
+            .item-obs { min-width: 100px; flex: 1; }
             .toolbar { flex-direction: column; align-items: stretch; }
             .footer-actions { flex-direction: column; align-items: stretch; }
             .footer-actions .left, .footer-actions .right { justify-content: center; }
+            .image-card { max-width: 80px; }
+            .image-card img { height: 60px; }
         }
     </style>
 </head>
 <body>
 <div class="container" id="app">
     <h1>📋 Checklist – ServiceNow Knowledge Center</h1>
-    <p class="subtitle">Verificação e auditoria do Knowledge Base (KB) – compartilhe com stakeholders em Word ou PDF</p>
+    <p class="subtitle">Verificação com imagens (antes/depois) – compartilhe em Word ou PDF</p>
 
     <!-- Toolbar -->
     <div class="toolbar">
@@ -268,7 +306,7 @@
     <!-- Formulário rápido para adicionar -->
     <div class="add-item-form">
         <input type="text" id="newItemDesc" placeholder="Descrição do item...">
-        <input type="text" id="newItemCategory" placeholder="Categoria (ex: Artigo, Categoria, Permissão)">
+        <input type="text" id="newItemCategory" placeholder="Categoria (ex: Artigo, Categoria)">
         <select id="newItemStatus">
             <option value="pending">Pendente</option>
             <option value="done">Concluído</option>
@@ -294,6 +332,7 @@
     // ============================================================
     let items = [];
     let nextId = 1;
+    let nextImgId = 1;
 
     // ============================================================
     //  DOM REFS
@@ -307,12 +346,13 @@
     const projectInput = document.getElementById('projectName');
 
     // ============================================================
-    //  PERSISTÊNCIA (localStorage)
+    //  PERSISTÊNCIA
     // ============================================================
     function saveState() {
         const data = {
             items: items,
             nextId: nextId,
+            nextImgId: nextImgId,
             title: titleInput.value,
             project: projectInput.value
         };
@@ -326,6 +366,7 @@
             const data = JSON.parse(raw);
             items = data.items || [];
             nextId = data.nextId || 1;
+            nextImgId = data.nextImgId || 1;
             titleInput.value = data.title || 'Auditoria – ServiceNow Knowledge Center';
             projectInput.value = data.project || 'ServiceNow';
             return true;
@@ -357,21 +398,44 @@
         }
 
         let html = '';
-        items.forEach((item, index) => {
+        items.forEach((item) => {
             const checked = item.status === 'done' ? 'checked' : '';
             const doneClass = item.status === 'done' ? 'done' : '';
+            const imagesHtml = (item.images || []).map(img => `
+                <div class="image-card">
+                    <img src="${img.data}" alt="${img.caption || 'Imagem'}">
+                    <div class="caption">${escapeHtml(img.caption || '')}</div>
+                    <button class="btn-remove-img" onclick="removeImage(${item.id}, ${img.id})">✕</button>
+                </div>
+            `).join('');
+
             html += `
                 <div class="checklist-item ${doneClass}" data-id="${item.id}">
-                    <input type="checkbox" ${checked} onchange="toggleItem(${item.id})">
-                    <span class="item-text">${escapeHtml(item.description)}</span>
-                    <span class="item-category">${escapeHtml(item.category || 'Geral')}</span>
-                    <input class="item-obs" type="text" placeholder="Observação..." value="${escapeHtml(item.obs || '')}" onchange="updateObs(${item.id}, this.value)">
-                    <button class="btn-remove" onclick="removeItem(${item.id})" title="Remover">✕</button>
+                    <div class="item-row">
+                        <input type="checkbox" ${checked} onchange="toggleItem(${item.id})">
+                        <span class="item-text">${escapeHtml(item.description)}</span>
+                        <span class="item-category">${escapeHtml(item.category || 'Geral')}</span>
+                        <input class="item-obs" type="text" placeholder="Observação..." value="${escapeHtml(item.obs || '')}" onchange="updateObs(${item.id}, this.value)">
+                        <button class="btn btn-image btn-sm" onclick="triggerImageUpload(${item.id})">📸 Imagem</button>
+                        <button class="btn-remove" onclick="removeItem(${item.id})" title="Remover">✕</button>
+                    </div>
+                    ${imagesHtml ? `<div class="item-images">${imagesHtml}</div>` : ''}
+                    <div class="add-image-form" id="imgForm_${item.id}" style="display:none;">
+                        <input type="file" accept="image/*" onchange="handleImageUpload(event, ${item.id})">
+                        <select id="imgCaption_${item.id}">
+                            <option value="Antes">Antes</option>
+                            <option value="Depois">Depois</option>
+                            <option value="Comparação">Comparação</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                        <input type="text" id="imgObs_${item.id}" placeholder="Descrição (opcional)" style="flex:1; min-width:100px;">
+                        <button class="btn btn-success btn-sm" onclick="finalizeImageUpload(${item.id})">✔ Adicionar</button>
+                        <button class="btn btn-outline btn-sm" onclick="cancelImageUpload(${item.id})">Cancelar</button>
+                    </div>
                 </div>
             `;
         });
         container.innerHTML = html;
-
         saveState();
     }
 
@@ -390,7 +454,8 @@
             description: desc,
             category: catInput.value.trim() || 'Geral',
             status: statusSelect.value,
-            obs: ''
+            obs: '',
+            images: []
         });
 
         descInput.value = '';
@@ -423,6 +488,96 @@
         if (!confirm('Limpar todos os itens do checklist?')) return;
         items = [];
         nextId = 1;
+        nextImgId = 1;
+        render();
+    }
+
+    // ============================================================
+    //  IMAGENS
+    // ============================================================
+    let pendingImageData = {};
+
+    function triggerImageUpload(itemId) {
+        const form = document.getElementById(`imgForm_${itemId}`);
+        if (form.style.display === 'none') {
+            form.style.display = 'flex';
+            // Ativa o input file
+            const fileInput = form.querySelector('input[type="file"]');
+            fileInput.click();
+        } else {
+            form.style.display = 'none';
+        }
+    }
+
+    function handleImageUpload(event, itemId) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            pendingImageData[itemId] = {
+                data: e.target.result,
+                name: file.name
+            };
+            // Mostra prévia
+            const form = document.getElementById(`imgForm_${itemId}`);
+            const preview = document.createElement('div');
+            preview.id = `preview_${itemId}`;
+            preview.innerHTML = `<img src="${e.target.result}" style="max-height:60px; border-radius:4px; border:1px solid #ddd;">`;
+            // Remove prévia antiga
+            const old = document.getElementById(`preview_${itemId}`);
+            if (old) old.remove();
+            form.prepend(preview);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function finalizeImageUpload(itemId) {
+        const data = pendingImageData[itemId];
+        if (!data) { alert('Selecione uma imagem primeiro.'); return; }
+        const item = items.find(i => i.id === itemId);
+        if (!item) return;
+        const captionSelect = document.getElementById(`imgCaption_${itemId}`);
+        const obsInput = document.getElementById(`imgObs_${itemId}`);
+        const caption = captionSelect ? captionSelect.value : 'Imagem';
+        const obs = obsInput ? obsInput.value.trim() : '';
+
+        item.images.push({
+            id: nextImgId++,
+            data: data.data,
+            name: data.name,
+            caption: caption + (obs ? ` - ${obs}` : '')
+        });
+
+        // Limpa
+        delete pendingImageData[itemId];
+        const form = document.getElementById(`imgForm_${itemId}`);
+        form.style.display = 'none';
+        const preview = document.getElementById(`preview_${itemId}`);
+        if (preview) preview.remove();
+        const fileInput = form.querySelector('input[type="file"]');
+        fileInput.value = '';
+        if (obsInput) obsInput.value = '';
+
+        render();
+    }
+
+    function cancelImageUpload(itemId) {
+        delete pendingImageData[itemId];
+        const form = document.getElementById(`imgForm_${itemId}`);
+        form.style.display = 'none';
+        const preview = document.getElementById(`preview_${itemId}`);
+        if (preview) preview.remove();
+        const fileInput = form.querySelector('input[type="file"]');
+        if (fileInput) fileInput.value = '';
+        const obsInput = document.getElementById(`imgObs_${itemId}`);
+        if (obsInput) obsInput.value = '';
+    }
+
+    function removeImage(itemId, imgId) {
+        const item = items.find(i => i.id === itemId);
+        if (!item) return;
+        if (!confirm('Remover esta imagem?')) return;
+        item.images = item.images.filter(img => img.id !== imgId);
         render();
     }
 
@@ -431,21 +586,16 @@
     // ============================================================
     function loadServiceNowExample() {
         items = [
-            { id: nextId++, description: 'Artigo possui título claro e objetivo', category: 'Artigo', status: 'pending', obs: '' },
-            { id: nextId++, description: 'Categoria e subcategoria estão corretamente associadas', category: 'Categoria', status: 'pending', obs: '' },
-            { id: nextId++, description: 'Permissões de visualização estão configuradas (público/privado/restrito)', category: 'Permissão', status: 'pending', obs: '' },
-            { id: nextId++, description: 'Metadados preenchidos: autor, data de criação, última atualização', category: 'Metadados', status: 'pending', obs: '' },
-            { id: nextId++, description: 'O conteúdo é relevante e atualizado (sem informações obsoletas)', category: 'Conteúdo', status: 'pending', obs: '' },
-            { id: nextId++, description: 'Palavras-chave e tags configuradas para melhorar a busca', category: 'SEO', status: 'pending', obs: '' },
-            { id: nextId++, description: 'Versão do documento está correta (controle de versão)', category: 'Versão', status: 'pending', obs: '' },
-            { id: nextId++, description: 'O artigo possui um processo de aprovação definido', category: 'Processo', status: 'pending', obs: '' },
-            { id: nextId++, description: 'O feedback dos usuários está sendo monitorado (avaliações)', category: 'Feedback', status: 'pending', obs: '' },
-            { id: nextId++, description: 'Links internos e referências para outros KB estão funcionando', category: 'Integração', status: 'pending', obs: '' },
-            { id: nextId++, description: 'A pesquisa retorna o artigo com relevância adequada', category: 'Busca', status: 'pending', obs: '' },
-            { id: nextId++, description: 'O artigo está disponível no portal de autoatendimento (Service Portal)', category: 'Portal', status: 'pending', obs: '' },
-            { id: nextId++, description: 'Agendamento de revisão periódica está configurado', category: 'Manutenção', status: 'pending', obs: '' },
-            { id: nextId++, description: 'O artigo não contém informações confidenciais expostas', category: 'Segurança', status: 'pending', obs: '' },
-            { id: nextId++, description: 'A estrutura do artigo segue o padrão: problema, causa, solução', category: 'Estrutura', status: 'pending', obs: '' },
+            { id: nextId++, description: 'Artigo possui título claro e objetivo', category: 'Artigo', status: 'pending', obs: '', images: [] },
+            { id: nextId++, description: 'Categoria e subcategoria estão corretamente associadas', category: 'Categoria', status: 'pending', obs: '', images: [] },
+            { id: nextId++, description: 'Permissões de visualização estão configuradas (público/privado/restrito)', category: 'Permissão', status: 'pending', obs: '', images: [] },
+            { id: nextId++, description: 'Metadados preenchidos: autor, data de criação, última atualização', category: 'Metadados', status: 'pending', obs: '', images: [] },
+            { id: nextId++, description: 'O conteúdo é relevante e atualizado (sem informações obsoletas)', category: 'Conteúdo', status: 'pending', obs: '', images: [] },
+            { id: nextId++, description: 'Palavras-chave e tags configuradas para melhorar a busca', category: 'SEO', status: 'pending', obs: '', images: [] },
+            { id: nextId++, description: 'Versão do documento está correta (controle de versão)', category: 'Versão', status: 'pending', obs: '', images: [] },
+            { id: nextId++, description: 'O artigo possui um processo de aprovação definido', category: 'Processo', status: 'pending', obs: '', images: [] },
+            { id: nextId++, description: 'O feedback dos usuários está sendo monitorado (avaliações)', category: 'Feedback', status: 'pending', obs: '', images: [] },
+            { id: nextId++, description: 'Links internos e referências para outros KB estão funcionando', category: 'Integração', status: 'pending', obs: '', images: [] },
         ];
         render();
     }
@@ -459,36 +609,32 @@
         const title = titleInput.value || 'Checklist ServiceNow';
         const project = projectInput.value || '';
 
-        const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, BorderStyle } = docx;
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, BorderStyle, ImageRun, WidthType, HeightType } = docx;
 
         const doc = new Document({
             sections: [{
                 properties: {},
                 children: [
                     new Paragraph({
-                        children: [
-                            new TextRun({ text: title, size: 28, bold: true, font: 'Arial' })
-                        ],
+                        children: [new TextRun({ text: title, size: 28, bold: true, font: 'Arial' })],
                         alignment: AlignmentType.CENTER,
                     }),
                     new Paragraph({
-                        children: [
-                            new TextRun({ text: `Projeto: ${project}`, size: 20, font: 'Arial' })
-                        ],
+                        children: [new TextRun({ text: `Projeto: ${project}`, size: 20, font: 'Arial' })],
                         alignment: AlignmentType.CENTER,
                     }),
                     new Paragraph({ text: '', spacing: { after: 200 } }),
                     new Paragraph({
-                        children: [
-                            new TextRun({ text: 'Checklist de Verificação – ServiceNow Knowledge Center', size: 24, bold: true, font: 'Arial' })
-                        ]
+                        children: [new TextRun({ text: 'Checklist de Verificação – ServiceNow Knowledge Center', size: 24, bold: true, font: 'Arial' })],
                     }),
                     new Paragraph({ text: '', spacing: { after: 100 } }),
                 ]
             }]
         });
 
+        // Para cada item, criar uma linha na tabela com as imagens em uma célula adicional
         const rows = [];
+        // Cabeçalho
         rows.push(new TableRow({
             children: [
                 new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '#', bold: true })], alignment: AlignmentType.CENTER })] }),
@@ -496,11 +642,49 @@
                 new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Categoria', bold: true })], alignment: AlignmentType.CENTER })] }),
                 new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Status', bold: true })], alignment: AlignmentType.CENTER })] }),
                 new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Observação', bold: true })], alignment: AlignmentType.LEFT })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Imagens', bold: true })], alignment: AlignmentType.CENTER })] }),
             ]
         }));
 
-        items.forEach((item, idx) => {
+        for (const [idx, item] of items.entries()) {
             const statusText = item.status === 'done' ? '✅ Concluído' : '⏳ Pendente';
+            // Célula de imagens: tentar embutir imagens (limitado a 2 por linha)
+            let imageParagraphs = [];
+            const images = item.images || [];
+            for (const img of images) {
+                try {
+                    // Converter base64 para Uint8Array
+                    const base64 = img.data.split(',')[1] || img.data;
+                    const binaryString = atob(base64);
+                    const bytes = new Uint8Array(binaryString.length);
+                    for (let i = 0; i < binaryString.length; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    const image = ImageRun.fromImageBuffer(bytes, {
+                        transformation: { width: 80, height: 60 },
+                        type: img.data.startsWith('data:image/png') ? 'png' : 'jpeg',
+                    });
+                    imageParagraphs.push(new Paragraph({
+                        children: [
+                            image,
+                            new TextRun({ text: ' ' + (img.caption || ''), size: 10 })
+                        ],
+                        alignment: AlignmentType.CENTER,
+                    }));
+                } catch(e) {
+                    imageParagraphs.push(new Paragraph({
+                        children: [new TextRun({ text: '[Imagem não disponível]', size: 10, color: '999999' })],
+                        alignment: AlignmentType.CENTER,
+                    }));
+                }
+            }
+            if (imageParagraphs.length === 0) {
+                imageParagraphs.push(new Paragraph({
+                    children: [new TextRun({ text: '—', size: 10, color: '999999' })],
+                    alignment: AlignmentType.CENTER,
+                }));
+            }
+
             rows.push(new TableRow({
                 children: [
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(idx+1) })], alignment: AlignmentType.CENTER })] }),
@@ -508,9 +692,10 @@
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.category || 'Geral' })], alignment: AlignmentType.CENTER })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: statusText })], alignment: AlignmentType.CENTER })] }),
                     new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.obs || '' })], alignment: AlignmentType.LEFT })] }),
+                    new TableCell({ children: imageParagraphs, alignment: AlignmentType.CENTER }),
                 ]
             }));
-        });
+        }
 
         const table = new Table({
             rows: rows,
@@ -531,9 +716,7 @@
         doc.sections[0].children.push(
             new Paragraph({ text: '', spacing: { before: 200 } }),
             new Paragraph({
-                children: [
-                    new TextRun({ text: `Gerado em ${now}`, size: 16, color: '666666', font: 'Arial' })
-                ],
+                children: [new TextRun({ text: `Gerado em ${now}`, size: 16, color: '666666', font: 'Arial' })],
                 alignment: AlignmentType.CENTER,
             })
         );
@@ -549,38 +732,49 @@
     }
 
     // ============================================================
-    //  EXPORTAÇÃO PDF
+    //  EXPORTAÇÃO PDF (com imagens)
     // ============================================================
     function exportPDF() {
         if (items.length === 0) { alert('Adicione itens ao checklist antes de exportar.'); return; }
 
         const tempDiv = document.createElement('div');
-        tempDiv.style.cssText = 'padding: 30px; font-family: Arial, sans-serif; max-width: 800px; margin: auto; background: white;';
+        tempDiv.style.cssText = 'padding: 30px; font-family: Arial, sans-serif; max-width: 900px; margin: auto; background: white;';
+        let rowsHtml = items.map((item, i) => {
+            const statusText = item.status === 'done' ? '✅ Concluído' : '⏳ Pendente';
+            const imagesHtml = (item.images || []).map(img => `
+                <div style="display:inline-block; margin:4px; text-align:center; border:1px solid #ddd; border-radius:6px; padding:4px; background:#f9fafb; max-width:100px;">
+                    <img src="${img.data}" style="max-height:60px; max-width:80px; border-radius:4px;">
+                    <div style="font-size:10px; color:#4b5563;">${escapeHtml(img.caption || '')}</div>
+                </div>
+            `).join('');
+            return `
+                <tr>
+                    <td style="padding:6px 10px; border:1px solid #d1d5db; text-align:center;">${i+1}</td>
+                    <td style="padding:6px 10px; border:1px solid #d1d5db;">${escapeHtml(item.description)}</td>
+                    <td style="padding:6px 10px; border:1px solid #d1d5db; text-align:center;">${escapeHtml(item.category || 'Geral')}</td>
+                    <td style="padding:6px 10px; border:1px solid #d1d5db; text-align:center;">${statusText}</td>
+                    <td style="padding:6px 10px; border:1px solid #d1d5db;">${escapeHtml(item.obs || '')}</td>
+                    <td style="padding:6px 10px; border:1px solid #d1d5db; text-align:center;">${imagesHtml || '—'}</td>
+                </tr>
+            `;
+        }).join('');
+
         tempDiv.innerHTML = `
             <h1 style="text-align:center; color:#1a1a2e;">${escapeHtml(titleInput.value || 'Checklist ServiceNow')}</h1>
             <p style="text-align:center; color:#6b7280;">${escapeHtml(projectInput.value ? 'Projeto: ' + projectInput.value : '')}</p>
             <hr style="margin: 20px 0;">
-            <table style="width:100%; border-collapse: collapse; font-size: 14px;">
+            <table style="width:100%; border-collapse: collapse; font-size: 13px;">
                 <thead>
                     <tr style="background: #f3f4f6;">
-                        <th style="padding: 8px 12px; border: 1px solid #d1d5db; text-align:center;">#</th>
-                        <th style="padding: 8px 12px; border: 1px solid #d1d5db; text-align:left;">Item</th>
-                        <th style="padding: 8px 12px; border: 1px solid #d1d5db; text-align:center;">Categoria</th>
-                        <th style="padding: 8px 12px; border: 1px solid #d1d5db; text-align:center;">Status</th>
-                        <th style="padding: 8px 12px; border: 1px solid #d1d5db; text-align:left;">Observação</th>
+                        <th style="padding:8px 10px; border:1px solid #d1d5db; text-align:center;">#</th>
+                        <th style="padding:8px 10px; border:1px solid #d1d5db; text-align:left;">Item</th>
+                        <th style="padding:8px 10px; border:1px solid #d1d5db; text-align:center;">Categoria</th>
+                        <th style="padding:8px 10px; border:1px solid #d1d5db; text-align:center;">Status</th>
+                        <th style="padding:8px 10px; border:1px solid #d1d5db; text-align:left;">Observação</th>
+                        <th style="padding:8px 10px; border:1px solid #d1d5db; text-align:center;">Imagens</th>
                     </tr>
                 </thead>
-                <tbody>
-                    ${items.map((item, i) => `
-                        <tr>
-                            <td style="padding: 6px 12px; border: 1px solid #d1d5db; text-align:center;">${i+1}</td>
-                            <td style="padding: 6px 12px; border: 1px solid #d1d5db;">${escapeHtml(item.description)}</td>
-                            <td style="padding: 6px 12px; border: 1px solid #d1d5db; text-align:center;">${escapeHtml(item.category || 'Geral')}</td>
-                            <td style="padding: 6px 12px; border: 1px solid #d1d5db; text-align:center;">${item.status === 'done' ? '✅ Concluído' : '⏳ Pendente'}</td>
-                            <td style="padding: 6px 12px; border: 1px solid #d1d5db;">${escapeHtml(item.obs || '')}</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
+                <tbody>${rowsHtml}</tbody>
             </table>
             <hr style="margin: 20px 0;">
             <p style="text-align:center; color:#9ca3af; font-size:12px;">Gerado em ${new Date().toLocaleString('pt-BR')}</p>
@@ -593,8 +787,8 @@
                 margin: 10,
                 filename: `${(titleInput.value || 'checklist').replace(/[^a-z0-9]/gi, '_')}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, letterRendering: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                html2canvas: { scale: 2, letterRendering: true, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
             })
             .from(tempDiv)
             .save()
