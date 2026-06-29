@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checklist –  Teste de Funcionalidade </title>
+    <title>Checklist –Teste de funcionalidade </title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/PptxGenJS@3.12.0/dist/pptxgen.bundle.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
         body { background:#f0f2f5; padding:20px; min-height:100vh; display:flex; justify-content:center; }
@@ -27,6 +28,8 @@
         .btn-pdf:hover { background:#b91c1c; }
         .btn-excel { background:#217346; color:#fff; }
         .btn-excel:hover { background:#1a5c38; }
+        .btn-powerpoint { background:#d24726; color:#fff; }
+        .btn-powerpoint:hover { background:#b33c1e; }
         .btn-image { background:#f59e0b; color:#fff; }
         .btn-image:hover { background:#d97706; }
         .btn-sm { padding:4px 10px; font-size:12px; }
@@ -87,8 +90,8 @@
 </head>
 <body>
 <div class="container" id="app">
-    <h1>📋 Checklist – Teste de Funcionalidades </h1>
-    <p class="subtitle">Verificação com imagens (antes/depois) – compartilhe em Word, Excel ou PDF</p>
+    <h1>📋 Checklist – Teste de Funcionalidade do sistema </h1>
+    <p class="subtitle">Verificação com imagens (antes/depois) – compartilhe em Word, Excel, PDF ou PowerPoint</p>
 
     <div class="toolbar">
         <input type="text" id="checklistTitle" placeholder="Título do checklist" value="Auditoria – ServiceNow Knowledge Center">
@@ -123,9 +126,10 @@
 
     <div class="footer-actions">
         <div class="left">
-            <button class="btn btn-export" onclick="exportWord()">📄 Exportar Word (DOC)</button>
-            <button class="btn btn-excel" onclick="exportExcel()">📊 Exportar Excel (XLS)</button>
-            <button class="btn btn-pdf" onclick="exportPDF()">📑 Exportar PDF</button>
+            <button class="btn btn-export" onclick="exportWord()">📄 Word (DOC)</button>
+            <button class="btn btn-excel" onclick="exportExcel()">📊 Excel (XLS)</button>
+            <button class="btn btn-powerpoint" onclick="exportPowerPoint()">📽️ PowerPoint (PPTX)</button>
+            <button class="btn btn-pdf" onclick="exportPDF()">📑 PDF</button>
         </div>
         <div class="right"></div>
     </div>
@@ -380,7 +384,7 @@
     }
 
     // ============================================================
-    //  EXPORTAÇÃO WORD (DOC) – COM DESIGN MELHORADO
+    //  EXPORTAÇÃO WORD (DOC)
     // ============================================================
     function exportWord() {
         if (items.length === 0) { alert('Adicione itens ao checklist antes de exportar.'); return; }
@@ -493,7 +497,7 @@
     }
 
     // ============================================================
-    //  EXPORTAÇÃO EXCEL (XLS) – COM DESIGN MELHORADO
+    //  EXPORTAÇÃO EXCEL (XLS)
     // ============================================================
     function exportExcel() {
         if (items.length === 0) { alert('Adicione itens ao checklist antes de exportar.'); return; }
@@ -599,7 +603,262 @@
     }
 
     // ============================================================
-    //  EXPORTAÇÃO PDF – COM DESIGN MELHORADO
+    //  EXPORTAÇÃO POWERPOINT (PPTX)
+    // ============================================================
+    async function exportPowerPoint() {
+        if (items.length === 0) { alert('Adicione itens ao checklist antes de exportar.'); return; }
+
+        try {
+            const title = titleInput.value || 'Checklist ServiceNow';
+            const project = projectInput.value || '';
+            const total = items.length;
+            const done = items.filter(i => i.status === 'done').length;
+            const pending = total - done;
+            const percent = Math.round((done / total) * 100);
+            const now = new Date().toLocaleString('pt-BR');
+
+            // Inicializa a apresentação
+            const pptx = new PptxGenJS();
+            pptx.defineLayout({ name: 'WIDE', width: 13.33, height: 7.5 });
+            pptx.layout = 'WIDE';
+
+            // ---------- SLIDE 1: CAPA ----------
+            const slide1 = pptx.addSlide();
+            slide1.background = { color: '1a1a2e' };
+            slide1.addText(title, {
+                x: 0.5, y: 0.5, w: 12.33, h: 1.2,
+                fontSize: 44, color: 'ffffff', align: 'center', bold: true, fontFace: 'Arial'
+            });
+            slide1.addText(`Projeto: ${project}`, {
+                x: 0.5, y: 1.8, w: 12.33, h: 0.6,
+                fontSize: 24, color: 'b0b0b0', align: 'center', fontFace: 'Arial'
+            });
+            slide1.addText(`📋 Checklist de Verificação – Knowledge Center`, {
+                x: 0.5, y: 2.5, w: 12.33, h: 0.5,
+                fontSize: 18, color: 'cccccc', align: 'center', fontFace: 'Arial'
+            });
+
+            // Resumo executivo na capa
+            const resumoY = 3.3;
+            slide1.addShape(pptx.ShapeType.rect, {
+                x: 1.0, y: resumoY, w: 11.33, h: 1.6,
+                fill: { color: '2d2d44' }, line: { color: '8b5cf6', width: 2 }
+            });
+            slide1.addText(`📊 Resumo`, {
+                x: 1.0, y: resumoY + 0.05, w: 11.33, h: 0.4,
+                fontSize: 16, color: '8b5cf6', align: 'center', bold: true, fontFace: 'Arial'
+            });
+            slide1.addText(`✅ ${done} Concluídos   |   ⏳ ${pending} Pendentes   |   ${percent}% concluído`, {
+                x: 1.0, y: resumoY + 0.5, w: 11.33, h: 0.5,
+                fontSize: 20, color: 'ffffff', align: 'center', fontFace: 'Arial'
+            });
+
+            slide1.addText(`Gerado em ${now}`, {
+                x: 0.5, y: 6.5, w: 12.33, h: 0.4,
+                fontSize: 14, color: '666666', align: 'center', fontFace: 'Arial'
+            });
+
+            // ---------- SLIDE 2: ITENS PENDENTES ----------
+            const pendingItems = items.filter(i => i.status === 'pending');
+            if (pendingItems.length > 0) {
+                const slide2 = pptx.addSlide();
+                slide2.background = { color: 'fefce8' };
+                slide2.addText('⏳ Itens Pendentes', {
+                    x: 0.5, y: 0.2, w: 12.33, h: 0.7,
+                    fontSize: 32, color: '1a1a2e', align: 'left', bold: true, fontFace: 'Arial'
+                });
+                slide2.addText(`Total: ${pendingItems.length} itens aguardando ação`, {
+                    x: 0.5, y: 0.9, w: 12.33, h: 0.4,
+                    fontSize: 16, color: '6b7280', align: 'left', fontFace: 'Arial'
+                });
+
+                let yPos = 1.5;
+                const maxY = 6.8;
+                const rowHeight = 0.5;
+                for (const item of pendingItems) {
+                    if (yPos + rowHeight > maxY) break;
+                    // Fundo alternado
+                    const bgColor = (pendingItems.indexOf(item) % 2 === 0) ? 'ffffff' : 'f9fafb';
+                    slide2.addShape(pptx.ShapeType.rect, {
+                        x: 0.5, y: yPos, w: 12.33, h: rowHeight,
+                        fill: { color: bgColor }, line: { color: 'e5e7eb', width: 0.5 }
+                    });
+                    slide2.addText(`${pendingItems.indexOf(item)+1}. ${item.description}`, {
+                        x: 0.7, y: yPos + 0.05, w: 7.0, h: 0.4,
+                        fontSize: 14, color: '1f2937', align: 'left', fontFace: 'Arial'
+                    });
+                    slide2.addText(`[${item.category || 'Geral'}]`, {
+                        x: 7.8, y: yPos + 0.05, w: 2.0, h: 0.4,
+                        fontSize: 12, color: '6b7280', align: 'center', fontFace: 'Arial'
+                    });
+                    slide2.addText(`Obs: ${item.obs || '—'}`, {
+                        x: 9.8, y: yPos + 0.05, w: 3.0, h: 0.4,
+                        fontSize: 12, color: '6b7280', align: 'left', fontFace: 'Arial'
+                    });
+                    yPos += rowHeight;
+                }
+                if (yPos > maxY) {
+                    slide2.addText('... mais itens pendentes', {
+                        x: 0.5, y: yPos, w: 12.33, h: 0.4,
+                        fontSize: 14, color: 'eab308', align: 'center', fontFace: 'Arial', italic: true
+                    });
+                }
+            }
+
+            // ---------- SLIDE 3: ITENS CONCLUÍDOS ----------
+            const doneItems = items.filter(i => i.status === 'done');
+            if (doneItems.length > 0) {
+                const slide3 = pptx.addSlide();
+                slide3.background = { color: 'f0fdf4' };
+                slide3.addText('✅ Itens Concluídos', {
+                    x: 0.5, y: 0.2, w: 12.33, h: 0.7,
+                    fontSize: 32, color: '1a1a2e', align: 'left', bold: true, fontFace: 'Arial'
+                });
+                slide3.addText(`Total: ${doneItems.length} itens concluídos com sucesso`, {
+                    x: 0.5, y: 0.9, w: 12.33, h: 0.4,
+                    fontSize: 16, color: '6b7280', align: 'left', fontFace: 'Arial'
+                });
+
+                let yPos = 1.5;
+                const maxY = 6.8;
+                const rowHeight = 0.5;
+                for (const item of doneItems) {
+                    if (yPos + rowHeight > maxY) break;
+                    const bgColor = (doneItems.indexOf(item) % 2 === 0) ? 'ffffff' : 'f0fdf4';
+                    slide3.addShape(pptx.ShapeType.rect, {
+                        x: 0.5, y: yPos, w: 12.33, h: rowHeight,
+                        fill: { color: bgColor }, line: { color: 'bbf7d0', width: 0.5 }
+                    });
+                    slide3.addText(`${doneItems.indexOf(item)+1}. ${item.description}`, {
+                        x: 0.7, y: yPos + 0.05, w: 7.0, h: 0.4,
+                        fontSize: 14, color: '1f2937', align: 'left', fontFace: 'Arial'
+                    });
+                    slide3.addText(`[${item.category || 'Geral'}]`, {
+                        x: 7.8, y: yPos + 0.05, w: 2.0, h: 0.4,
+                        fontSize: 12, color: '6b7280', align: 'center', fontFace: 'Arial'
+                    });
+                    slide3.addText(`Obs: ${item.obs || '—'}`, {
+                        x: 9.8, y: yPos + 0.05, w: 3.0, h: 0.4,
+                        fontSize: 12, color: '6b7280', align: 'left', fontFace: 'Arial'
+                    });
+                    yPos += rowHeight;
+                }
+                if (yPos > maxY) {
+                    slide3.addText('... mais itens concluídos', {
+                        x: 0.5, y: yPos, w: 12.33, h: 0.4,
+                        fontSize: 14, color: '22c55e', align: 'center', fontFace: 'Arial', italic: true
+                    });
+                }
+            }
+
+            // ---------- SLIDE 4: TABELA COMPLETA ----------
+            const slide4 = pptx.addSlide();
+            slide4.background = { color: 'ffffff' };
+            slide4.addText('📋 Checklist Completo', {
+                x: 0.5, y: 0.2, w: 12.33, h: 0.6,
+                fontSize: 28, color: '1a1a2e', align: 'left', bold: true, fontFace: 'Arial'
+            });
+
+            // Tabela com todos os itens
+            const rows = [['#', 'Item', 'Categoria', 'Status', 'Observação']];
+            for (const [idx, item] of items.entries()) {
+                const statusText = item.status === 'done' ? '✅ Concluído' : '⏳ Pendente';
+                rows.push([
+                    `${idx+1}`,
+                    item.description,
+                    item.category || 'Geral',
+                    statusText,
+                    item.obs || ''
+                ]);
+            }
+
+            slide4.addTable(rows, {
+                x: 0.5, y: 1.0, w: 12.33, h: 5.8,
+                fontSize: 12,
+                color: '1f2937',
+                fontFace: 'Arial',
+                border: { type: 'solid', color: 'd1d5db', pt: 0.5 },
+                colW: [0.5, 4.5, 2.0, 2.0, 3.33],
+                rowH: [0.5, ...Array(items.length).fill(0.45)],
+                cellStyles: [
+                    { fill: { color: '8b5cf6' }, color: 'ffffff', align: 'center', bold: true },
+                    ...items.map((item, i) => {
+                        const bgColor = item.status === 'done' ? 'f0fdf4' : 'fefce8';
+                        return { fill: { color: bgColor }, align: 'center' };
+                    })
+                ]
+            });
+
+            // ---------- SLIDE 5: IMAGENS (se houver) ----------
+            const itemsWithImages = items.filter(i => i.images && i.images.length > 0);
+            if (itemsWithImages.length > 0) {
+                const slide5 = pptx.addSlide();
+                slide5.background = { color: 'f8fafc' };
+                slide5.addText('🖼️ Evidências em Imagem', {
+                    x: 0.5, y: 0.2, w: 12.33, h: 0.6,
+                    fontSize: 28, color: '1a1a2e', align: 'left', bold: true, fontFace: 'Arial'
+                });
+
+                let xPos = 0.5;
+                let yPos = 1.2;
+                let colCount = 0;
+                for (const item of itemsWithImages) {
+                    for (const img of item.images) {
+                        if (colCount >= 3) { colCount = 0; xPos = 0.5; yPos += 1.8; }
+                        if (yPos > 6.8) break;
+                        // Adiciona a imagem
+                        try {
+                            slide5.addImage({
+                                data: img.data,
+                                x: xPos, y: yPos, w: 3.8, h: 1.4,
+                                borderRadius: 4,
+                            });
+                            slide5.addText(`${item.description.substring(0, 20)}...`, {
+                                x: xPos, y: yPos + 1.45, w: 3.8, h: 0.25,
+                                fontSize: 9, color: '4b5563', align: 'center', fontFace: 'Arial'
+                            });
+                            slide5.addText(img.caption || '', {
+                                x: xPos, y: yPos + 1.7, w: 3.8, h: 0.2,
+                                fontSize: 8, color: '6b7280', align: 'center', fontFace: 'Arial'
+                            });
+                            xPos += 4.0;
+                            colCount++;
+                        } catch (e) {
+                            console.warn('Erro ao adicionar imagem no PowerPoint:', e);
+                        }
+                    }
+                }
+            }
+
+            // ---------- SLIDE FINAL: OBRIGADO ----------
+            const slideEnd = pptx.addSlide();
+            slideEnd.background = { color: '1a1a2e' };
+            slideEnd.addText('✅ Checklist Finalizado', {
+                x: 0.5, y: 2.5, w: 12.33, h: 1.0,
+                fontSize: 44, color: 'ffffff', align: 'center', bold: true, fontFace: 'Arial'
+            });
+            slideEnd.addText(`Resumo: ${done} concluídos, ${pending} pendentes (${percent}% concluído)`, {
+                x: 0.5, y: 3.7, w: 12.33, h: 0.6,
+                fontSize: 20, color: 'b0b0b0', align: 'center', fontFace: 'Arial'
+            });
+            slideEnd.addText(`Gerado em ${now}`, {
+                x: 0.5, y: 4.5, w: 12.33, h: 0.4,
+                fontSize: 16, color: '666666', align: 'center', fontFace: 'Arial'
+            });
+
+            // Exporta
+            const fileName = `${title.replace(/[^a-z0-9]/gi, '_')}.pptx`;
+            await pptx.writeFile({ fileName });
+            alert(`✅ Apresentação PowerPoint gerada com sucesso!\nArquivo: ${fileName}`);
+
+        } catch (error) {
+            console.error('Erro na exportação PowerPoint:', error);
+            alert('Erro ao gerar o PowerPoint: ' + error.message);
+        }
+    }
+
+    // ============================================================
+    //  EXPORTAÇÃO PDF
     // ============================================================
     function exportPDF() {
         if (items.length === 0) { alert('Adicione itens ao checklist antes de exportar.'); return; }
