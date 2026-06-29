@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checklist – ServiceNow Knowledge Center</title>
-    <!-- Carregamento das bibliotecas com CDNs confiáveis -->
+    <title>Checklist – Teste para Sistemas </title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx@8.3.2/build/index.min.js"></script>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',system-ui,sans-serif; }
         body { background:#f0f2f5; padding:20px; min-height:100vh; display:flex; justify-content:center; }
@@ -87,7 +85,7 @@
 </head>
 <body>
 <div class="container" id="app">
-    <h1>📋 Checklist – ServiceNow Knowledge Center</h1>
+    <h1>📋 Checklist –  Teste para Sistemas</h1>
     <p class="subtitle">Verificação com imagens (antes/depois) – compartilhe em Word ou PDF</p>
 
     <div class="toolbar">
@@ -379,165 +377,99 @@
     }
 
     // ============================================================
-    //  EXPORTAÇÃO WORD (DOCX) – CORRIGIDA
+    //  EXPORTAÇÃO WORD (DOC) – usando HTML (funciona sem bibliotecas)
     // ============================================================
-    async function exportWord() {
+    function exportWord() {
         if (items.length === 0) {
             alert('Adicione itens ao checklist antes de exportar.');
             return;
         }
 
-        // Verifica se a biblioteca docx está disponível
-        if (typeof docx === 'undefined') {
-            alert('A biblioteca docx não foi carregada. Verifique sua conexão com a internet e recarregue a página.');
-            return;
-        }
-
         try {
-            const title = titleInput.value || 'Checklist ServiceNow';
-            const project = projectInput.value || '';
+            const title = escapeHtml(titleInput.value || 'Checklist ServiceNow');
+            const project = escapeHtml(projectInput.value || '');
+            const total = items.length;
+            const done = items.filter(i => i.status === 'done').length;
+            const percent = Math.round((done / total) * 100);
 
-            const { Document, Packer, Paragraph, TextRun, AlignmentType, Table, TableRow, TableCell, BorderStyle, ImageRun, WidthType } = docx;
-
-            const doc = new Document({
-                sections: [{
-                    properties: {},
-                    children: [
-                        new Paragraph({
-                            children: [new TextRun({ text: title, size: 28, bold: true, font: 'Arial' })],
-                            alignment: AlignmentType.CENTER,
-                        }),
-                        new Paragraph({
-                            children: [new TextRun({ text: `Projeto: ${project}`, size: 20, font: 'Arial' })],
-                            alignment: AlignmentType.CENTER,
-                        }),
-                        new Paragraph({ text: '', spacing: { after: 200 } }),
-                        new Paragraph({
-                            children: [new TextRun({ text: 'RELATÓRIO DE VERIFICAÇÃO – KNOWLEDGE CENTER', size: 24, bold: true, font: 'Arial' })],
-                            alignment: AlignmentType.CENTER,
-                        }),
-                        new Paragraph({ text: '', spacing: { after: 100 } }),
-                        // Resumo executivo
-                        new Paragraph({
-                            children: [
-                                new TextRun({ text: 'Resumo: ', bold: true, size: 18 }),
-                                new TextRun({ text: `${items.filter(i => i.status === 'done').length} de ${items.length} itens concluídos (${Math.round(items.filter(i => i.status === 'done').length / items.length * 100)}%)`, size: 18 }),
-                            ],
-                            alignment: AlignmentType.LEFT,
-                        }),
-                        new Paragraph({ text: '', spacing: { after: 200 } }),
-                        new Paragraph({
-                            children: [new TextRun({ text: 'DETALHAMENTO DOS ITENS', size: 20, bold: true })],
-                            alignment: AlignmentType.LEFT,
-                        }),
-                        new Paragraph({ text: '', spacing: { after: 100 } }),
-                    ]
-                }]
-            });
-
-            // Tabela
-            const rows = [];
-            // Cabeçalho
-            rows.push(new TableRow({
-                children: [
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '#', bold: true })], alignment: AlignmentType.CENTER })] }),
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Item', bold: true })], alignment: AlignmentType.LEFT })] }),
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Categoria', bold: true })], alignment: AlignmentType.CENTER })] }),
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Status', bold: true })], alignment: AlignmentType.CENTER })] }),
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Observação', bold: true })], alignment: AlignmentType.LEFT })] }),
-                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Imagens', bold: true })], alignment: AlignmentType.CENTER })] }),
-                ]
-            }));
-
-            // Linhas de dados
-            for (const [idx, item] of items.entries()) {
+            let rowsHtml = items.map((item, i) => {
                 const statusText = item.status === 'done' ? '✅ Concluído' : '⏳ Pendente';
-                let imageParagraphs = [];
-                const images = item.images || [];
+                const imagesHtml = (item.images || []).map(img => `
+                    <div style="display:inline-block; margin:4px; text-align:center; border:1px solid #ddd; border-radius:4px; padding:4px; background:#f9fafb; max-width:120px;">
+                        <img src="${img.data}" style="max-height:60px; max-width:100px; border-radius:4px;">
+                        <div style="font-size:9px; color:#555;">${escapeHtml(img.caption || '')}</div>
+                    </div>
+                `).join('');
+                return `
+                    <tr>
+                        <td style="padding:6px 10px; border:1px solid #ccc; text-align:center;">${i+1}</td>
+                        <td style="padding:6px 10px; border:1px solid #ccc;">${escapeHtml(item.description)}</td>
+                        <td style="padding:6px 10px; border:1px solid #ccc; text-align:center;">${escapeHtml(item.category || 'Geral')}</td>
+                        <td style="padding:6px 10px; border:1px solid #ccc; text-align:center;">${statusText}</td>
+                        <td style="padding:6px 10px; border:1px solid #ccc;">${escapeHtml(item.obs || '')}</td>
+                        <td style="padding:6px 10px; border:1px solid #ccc; text-align:center;">${imagesHtml || '—'}</td>
+                    </tr>
+                `;
+            }).join('');
 
-                if (images.length === 0) {
-                    imageParagraphs.push(new Paragraph({
-                        children: [new TextRun({ text: '—', size: 10, color: '999999' })],
-                        alignment: AlignmentType.CENTER,
-                    }));
-                } else {
-                    for (const img of images) {
-                        try {
-                            const base64Data = img.data.split(',')[1] || img.data;
-                            const binaryString = atob(base64Data);
-                            const bytes = new Uint8Array(binaryString.length);
-                            for (let i = 0; i < binaryString.length; i++) {
-                                bytes[i] = binaryString.charCodeAt(i);
-                            }
+            const htmlContent = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+                  xmlns:w='urn:schemas-microsoft-com:office:word' 
+                  xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+                <meta charset="utf-8">
+                <title>Checklist</title>
+                <!--[if gte mso 9]>
+                <xml>
+                    <w:WordDocument>
+                        <w:View>Print</w:View>
+                        <w:Zoom>100</w:Zoom>
+                    </w:WordDocument>
+                </xml>
+                <![endif]-->
+                <style>
+                    body { font-family: Arial, sans-serif; padding: 20px; }
+                    h1 { text-align: center; color: #1a1a2e; }
+                    h2 { text-align: center; color: #6b7280; font-weight: normal; }
+                    .summary { text-align: center; font-size: 16px; margin: 20px 0; }
+                    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+                    th { background: #f3f4f6; padding: 8px 10px; border: 1px solid #ccc; }
+                    td { padding: 6px 10px; border: 1px solid #ccc; }
+                    .images-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+                    .footer { text-align: center; margin-top: 30px; color: #9ca3af; font-size: 12px; }
+                </style>
+            </head>
+            <body>
+                <h1>${title}</h1>
+                <h2>Projeto: ${project}</h2>
+                <hr>
+                <div class="summary">
+                    <strong>Resumo:</strong> ${done} de ${total} itens concluídos (${percent}%)
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Item</th>
+                            <th>Categoria</th>
+                            <th>Status</th>
+                            <th>Observação</th>
+                            <th>Imagens</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+                <div class="footer">Gerado em ${new Date().toLocaleString('pt-BR')}</div>
+            </body>
+            </html>
+            `;
 
-                            let imageType = 'jpeg';
-                            if (img.data.startsWith('data:image/png')) imageType = 'png';
-                            else if (img.data.startsWith('data:image/gif')) imageType = 'gif';
-                            else if (img.data.startsWith('data:image/webp')) imageType = 'webp';
-
-                            const image = ImageRun.fromImageBuffer(bytes, {
-                                transformation: { width: 100, height: 75 },
-                                type: imageType,
-                            });
-
-                            imageParagraphs.push(new Paragraph({
-                                children: [
-                                    image,
-                                    new TextRun({ text: ' ' + (img.caption || ''), size: 10 })
-                                ],
-                                alignment: AlignmentType.CENTER,
-                            }));
-                        } catch (e) {
-                            console.warn('Erro ao embutir imagem:', e);
-                            imageParagraphs.push(new Paragraph({
-                                children: [new TextRun({ text: '[Imagem não disponível]', size: 10, color: '999999' })],
-                                alignment: AlignmentType.CENTER,
-                            }));
-                        }
-                    }
-                }
-
-                rows.push(new TableRow({
-                    children: [
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(idx+1) })], alignment: AlignmentType.CENTER })] }),
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.description })], alignment: AlignmentType.LEFT })] }),
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.category || 'Geral' })], alignment: AlignmentType.CENTER })] }),
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: statusText })], alignment: AlignmentType.CENTER })] }),
-                        new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.obs || '' })], alignment: AlignmentType.LEFT })] }),
-                        new TableCell({ children: imageParagraphs, alignment: AlignmentType.CENTER }),
-                    ]
-                }));
-            }
-
-            const table = new Table({
-                rows: rows,
-                width: { size: 100, type: WidthType.PERCENTAGE },
-                borders: {
-                    insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
-                    insideVertical: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
-                    top: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
-                    bottom: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
-                    left: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
-                    right: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
-                }
-            });
-
-            doc.sections[0].children.push(table);
-
-            // Rodapé
-            const now = new Date().toLocaleString('pt-BR');
-            doc.sections[0].children.push(
-                new Paragraph({ text: '', spacing: { before: 200 } }),
-                new Paragraph({
-                    children: [new TextRun({ text: `Gerado em ${now}`, size: 16, color: '666666', font: 'Arial' })],
-                    alignment: AlignmentType.CENTER,
-                })
-            );
-
-            const blob = await Packer.toBlob(doc);
+            const blob = new Blob([htmlContent], { type: 'application/msword' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `${title.replace(/[^a-z0-9]/gi, '_')}.docx`;
+            link.download = `${title.replace(/[^a-z0-9]/gi, '_')}.doc`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -545,12 +477,12 @@
 
         } catch (error) {
             console.error('Erro na exportação Word:', error);
-            alert('Erro ao gerar o arquivo Word: ' + error.message + '\nVerifique o console para mais detalhes.');
+            alert('Erro ao gerar o arquivo Word: ' + error.message);
         }
     }
 
     // ============================================================
-    //  EXPORTAÇÃO PDF COM IMAGENS EMBUTIDAS
+    //  EXPORTAÇÃO PDF
     // ============================================================
     function exportPDF() {
         if (items.length === 0) {
