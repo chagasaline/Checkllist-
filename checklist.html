@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checklist – ServiceNow Knowledge Center</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.3.2/docx.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        body {
+            background: #f0f2f5;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            padding: 30px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #1a1a2e;
+            margin-bottom: 4px;
+        }
+        .subtitle {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .toolbar input, .toolbar select {
+            padding: 8px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f9fafb;
+            flex: 1 1 200px;
+        }
+        .toolbar input:focus, .toolbar select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+        }
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary { background: #3b82f6; color: #fff; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-success { background: #22c55e; color: #fff; }
+        .btn-success:hover { background: #16a34a; }
+        .btn-danger { background: #ef4444; color: #fff; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-outline { background: transparent; border: 1.5px solid #d1d5db; color: #374151; }
+        .btn-outline:hover { background: #f3f4f6; }
+        .btn-export { background: #8b5cf6; color: #fff; }
+        .btn-export:hover { background: #7c3aed; }
+        .btn-pdf { background: #dc2626; color: #fff; }
+        .btn-pdf:hover { background: #b91c1c; }
+        .btn-servicenow { background: #2d6a4f; color: #fff; }
+        .btn-servicenow:hover { background: #1b4332; }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #e5e7eb;
+        }
+        .stats span {
+            font-size: 14px;
+            color: #4b5563;
+        }
+        .stats strong {
+            color: #1a1a2e;
+        }
+
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: #f9fafb;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.15s;
+        }
+        .checklist-item:hover {
+            background: #f3f4f6;
+        }
+        .checklist-item.done {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        .checklist-item.done .item-text {
+            text-decoration: line-through;
+            color: #6b7280;
+        }
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #22c55e;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .checklist-item .item-text {
+            flex: 1;
+            font-size: 15px;
+            color: #1f2937;
+            word-break: break-word;
+        }
+        .checklist-item .item-category {
+            font-size: 11px;
+            background: #e5e7eb;
+            padding: 2px 10px;
+            border-radius: 12px;
+            color: #4b5563;
+            white-space: nowrap;
+        }
+        .checklist-item .item-obs {
+            font-size: 13px;
+            color: #6b7280;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 4px 10px;
+            min-width: 120px;
+            max-width: 200px;
+        }
+        .checklist-item .item-obs:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .checklist-item .btn-remove {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 0 4px;
+            transition: color 0.2s;
+        }
+        .checklist-item .btn-remove:hover {
+            color: #ef4444;
+        }
+
+        .add-item-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            padding: 16px 0;
+            border-top: 1px solid #e5e7eb;
+        }
+        .add-item-form input, .add-item-form select {
+            padding: 8px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f9fafb;
+            flex: 1 1 160px;
+        }
+        .add-item-form input:focus, .add-item-form select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9ca3af;
+        }
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .footer-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .footer-actions .left, .footer-actions .right {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 640px) {
+            .container { padding: 16px; }
+            .checklist-item { flex-wrap: wrap; }
+            .checklist-item .item-obs { min-width: 100px; max-width: 100%; flex: 1; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .footer-actions { flex-direction: column; align-items: stretch; }
+            .footer-actions .left, .footer-actions .right { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+<div class="container" id="app">
+    <h1>📋 Checklist – ServiceNow Knowledge Center</h1>
+    <p class="subtitle">Verificação e auditoria do Knowledge Base (KB) – compartilhe com stakeholders em Word ou PDF</p>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <input type="text" id="checklistTitle" placeholder="Título do checklist" value="Auditoria – ServiceNow Knowledge Center">
+        <input type="text" id="projectName" placeholder="Nome do projeto" value="ServiceNow">
+        <button class="btn btn-primary" onclick="addItem()">➕ Adicionar Item</button>
+        <button class="btn btn-outline" onclick="clearAll()">🗑 Limpar</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats" id="stats">
+        <span>📦 <strong id="totalItems">0</strong> itens</span>
+        <span>✅ <strong id="doneItems">0</strong> concluídos</span>
+        <span>⏳ <strong id="pendingItems">0</strong> pendentes</span>
+        <span>📊 <strong id="progressPercent">0%</strong> concluído</span>
+    </div>
+
+    <!-- Checklist -->
+    <div id="checklistContainer" class="checklist">
+        <div class="empty-state">
+            <div class="icon">📝</div>
+            <p>Nenhum item adicionado.<br>Use o campo acima para criar seu checklist.</p>
+        </div>
+    </div>
+
+    <!-- Formulário rápido para adicionar -->
+    <div class="add-item-form">
+        <input type="text" id="newItemDesc" placeholder="Descrição do item...">
+        <input type="text" id="newItemCategory" placeholder="Categoria (ex: Artigo, Categoria, Permissão)">
+        <select id="newItemStatus">
+            <option value="pending">Pendente</option>
+            <option value="done">Concluído</option>
+        </select>
+        <button class="btn btn-success" onclick="addItem()">➕ Adicionar</button>
+    </div>
+
+    <!-- Footer com exportações -->
+    <div class="footer-actions">
+        <div class="left">
+            <button class="btn btn-export" onclick="exportWord()">📄 Exportar Word (DOCX)</button>
+            <button class="btn btn-pdf" onclick="exportPDF()">📑 Exportar PDF</button>
+        </div>
+        <div class="right">
+            <button class="btn btn-servicenow" onclick="loadServiceNowExample()">🔄 Carregar Exemplo ServiceNow</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    //  ESTADO
+    // ============================================================
+    let items = [];
+    let nextId = 1;
+
+    // ============================================================
+    //  DOM REFS
+    // ============================================================
+    const container = document.getElementById('checklistContainer');
+    const totalSpan = document.getElementById('totalItems');
+    const doneSpan = document.getElementById('doneItems');
+    const pendingSpan = document.getElementById('pendingItems');
+    const progressSpan = document.getElementById('progressPercent');
+    const titleInput = document.getElementById('checklistTitle');
+    const projectInput = document.getElementById('projectName');
+
+    // ============================================================
+    //  PERSISTÊNCIA (localStorage)
+    // ============================================================
+    function saveState() {
+        const data = {
+            items: items,
+            nextId: nextId,
+            title: titleInput.value,
+            project: projectInput.value
+        };
+        localStorage.setItem('checklistData', JSON.stringify(data));
+    }
+
+    function loadState() {
+        const raw = localStorage.getItem('checklistData');
+        if (!raw) return false;
+        try {
+            const data = JSON.parse(raw);
+            items = data.items || [];
+            nextId = data.nextId || 1;
+            titleInput.value = data.title || 'Auditoria – ServiceNow Knowledge Center';
+            projectInput.value = data.project || 'ServiceNow';
+            return true;
+        } catch { return false; }
+    }
+
+    // ============================================================
+    //  RENDER
+    // ============================================================
+    function render() {
+        const total = items.length;
+        const done = items.filter(i => i.status === 'done').length;
+        const pending = total - done;
+        const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+
+        totalSpan.textContent = total;
+        doneSpan.textContent = done;
+        pendingSpan.textContent = pending;
+        progressSpan.textContent = percent + '%';
+
+        if (total === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📝</div>
+                    <p>Nenhum item adicionado.<br>Use o campo acima para criar seu checklist.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        items.forEach((item, index) => {
+            const checked = item.status === 'done' ? 'checked' : '';
+            const doneClass = item.status === 'done' ? 'done' : '';
+            html += `
+                <div class="checklist-item ${doneClass}" data-id="${item.id}">
+                    <input type="checkbox" ${checked} onchange="toggleItem(${item.id})">
+                    <span class="item-text">${escapeHtml(item.description)}</span>
+                    <span class="item-category">${escapeHtml(item.category || 'Geral')}</span>
+                    <input class="item-obs" type="text" placeholder="Observação..." value="${escapeHtml(item.obs || '')}" onchange="updateObs(${item.id}, this.value)">
+                    <button class="btn-remove" onclick="removeItem(${item.id})" title="Remover">✕</button>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+
+        saveState();
+    }
+
+    // ============================================================
+    //  OPERAÇÕES
+    // ============================================================
+    function addItem() {
+        const descInput = document.getElementById('newItemDesc');
+        const catInput = document.getElementById('newItemCategory');
+        const statusSelect = document.getElementById('newItemStatus');
+        const desc = descInput.value.trim();
+        if (!desc) { alert('Digite uma descrição para o item.'); return; }
+
+        items.push({
+            id: nextId++,
+            description: desc,
+            category: catInput.value.trim() || 'Geral',
+            status: statusSelect.value,
+            obs: ''
+        });
+
+        descInput.value = '';
+        catInput.value = '';
+        statusSelect.value = 'pending';
+        render();
+    }
+
+    function toggleItem(id) {
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+        item.status = item.status === 'done' ? 'pending' : 'done';
+        render();
+    }
+
+    function updateObs(id, value) {
+        const item = items.find(i => i.id === id);
+        if (!item) return;
+        item.obs = value;
+        saveState();
+    }
+
+    function removeItem(id) {
+        if (!confirm('Remover este item do checklist?')) return;
+        items = items.filter(i => i.id !== id);
+        render();
+    }
+
+    function clearAll() {
+        if (!confirm('Limpar todos os itens do checklist?')) return;
+        items = [];
+        nextId = 1;
+        render();
+    }
+
+    // ============================================================
+    //  EXEMPLO – ServiceNow Knowledge Center
+    // ============================================================
+    function loadServiceNowExample() {
+        items = [
+            { id: nextId++, description: 'Artigo possui título claro e objetivo', category: 'Artigo', status: 'pending', obs: '' },
+            { id: nextId++, description: 'Categoria e subcategoria estão corretamente associadas', category: 'Categoria', status: 'pending', obs: '' },
+            { id: nextId++, description: 'Permissões de visualização estão configuradas (público/privado/restrito)', category: 'Permissão', status: 'pending', obs: '' },
+            { id: nextId++, description: 'Metadados preenchidos: autor, data de criação, última atualização', category: 'Metadados', status: 'pending', obs: '' },
+            { id: nextId++, description: 'O conteúdo é relevante e atualizado (sem informações obsoletas)', category: 'Conteúdo', status: 'pending', obs: '' },
+            { id: nextId++, description: 'Palavras-chave e tags configuradas para melhorar a busca', category: 'SEO', status: 'pending', obs: '' },
+            { id: nextId++, description: 'Versão do documento está correta (controle de versão)', category: 'Versão', status: 'pending', obs: '' },
+            { id: nextId++, description: 'O artigo possui um processo de aprovação definido', category: 'Processo', status: 'pending', obs: '' },
+            { id: nextId++, description: 'O feedback dos usuários está sendo monitorado (avaliações)', category: 'Feedback', status: 'pending', obs: '' },
+            { id: nextId++, description: 'Links internos e referências para outros KB estão funcionando', category: 'Integração', status: 'pending', obs: '' },
+            { id: nextId++, description: 'A pesquisa retorna o artigo com relevância adequada', category: 'Busca', status: 'pending', obs: '' },
+            { id: nextId++, description: 'O artigo está disponível no portal de autoatendimento (Service Portal)', category: 'Portal', status: 'pending', obs: '' },
+            { id: nextId++, description: 'Agendamento de revisão periódica está configurado', category: 'Manutenção', status: 'pending', obs: '' },
+            { id: nextId++, description: 'O artigo não contém informações confidenciais expostas', category: 'Segurança', status: 'pending', obs: '' },
+            { id: nextId++, description: 'A estrutura do artigo segue o padrão: problema, causa, solução', category: 'Estrutura', status: 'pending', obs: '' },
+        ];
+        render();
+    }
+
+    // ============================================================
+    //  EXPORTAÇÃO WORD (DOCX)
+    // ============================================================
+    async function exportWord() {
+        if (items.length === 0) { alert('Adicione itens ao checklist antes de exportar.'); return; }
+
+        const title = titleInput.value || 'Checklist ServiceNow';
+        const project = projectInput.value || '';
+
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Table, TableRow, TableCell, BorderStyle } = docx;
+
+        const doc = new Document({
+            sections: [{
+                properties: {},
+                children: [
+                    new Paragraph({
+                        children: [
+                            new TextRun({ text: title, size: 28, bold: true, font: 'Arial' })
+                        ],
+                        alignment: AlignmentType.CENTER,
+                    }),
+                    new Paragraph({
+                        children: [
+                            new TextRun({ text: `Projeto: ${project}`, size: 20, font: 'Arial' })
+                        ],
+                        alignment: AlignmentType.CENTER,
+                    }),
+                    new Paragraph({ text: '', spacing: { after: 200 } }),
+                    new Paragraph({
+                        children: [
+                            new TextRun({ text: 'Checklist de Verificação – ServiceNow Knowledge Center', size: 24, bold: true, font: 'Arial' })
+                        ]
+                    }),
+                    new Paragraph({ text: '', spacing: { after: 100 } }),
+                ]
+            }]
+        });
+
+        const rows = [];
+        rows.push(new TableRow({
+            children: [
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '#', bold: true })], alignment: AlignmentType.CENTER })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Item', bold: true })], alignment: AlignmentType.LEFT })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Categoria', bold: true })], alignment: AlignmentType.CENTER })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Status', bold: true })], alignment: AlignmentType.CENTER })] }),
+                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Observação', bold: true })], alignment: AlignmentType.LEFT })] }),
+            ]
+        }));
+
+        items.forEach((item, idx) => {
+            const statusText = item.status === 'done' ? '✅ Concluído' : '⏳ Pendente';
+            rows.push(new TableRow({
+                children: [
+                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: String(idx+1) })], alignment: AlignmentType.CENTER })] }),
+                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.description })], alignment: AlignmentType.LEFT })] }),
+                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.category || 'Geral' })], alignment: AlignmentType.CENTER })] }),
+                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: statusText })], alignment: AlignmentType.CENTER })] }),
+                    new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: item.obs || '' })], alignment: AlignmentType.LEFT })] }),
+                ]
+            }));
+        });
+
+        const table = new Table({
+            rows: rows,
+            width: { size: 100, type: docx.WidthType.PERCENTAGE },
+            borders: {
+                insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+                insideVertical: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+                top: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+                bottom: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+                left: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+                right: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+            }
+        });
+
+        doc.sections[0].children.push(table);
+
+        const now = new Date().toLocaleString('pt-BR');
+        doc.sections[0].children.push(
+            new Paragraph({ text: '', spacing: { before: 200 } }),
+            new Paragraph({
+                children: [
+                    new TextRun({ text: `Gerado em ${now}`, size: 16, color: '666666', font: 'Arial' })
+                ],
+                alignment: AlignmentType.CENTER,
+            })
+        );
+
+        const blob = await Packer.toBlob(doc);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${title.replace(/[^a-z0-9]/gi, '_')}.docx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(link.href), 5000);
+    }
+
+    // ============================================================
+    //  EXPORTAÇÃO PDF
+    // ============================================================
+    function exportPDF() {
+        if (items.length === 0) { alert('Adicione itens ao checklist antes de exportar.'); return; }
+
+        const tempDiv = document.createElement('div');
+        tempDiv.style.cssText = 'padding: 30px; font-family: Arial, sans-serif; max-width: 800px; margin: auto; background: white;';
+        tempDiv.innerHTML = `
+            <h1 style="text-align:center; color:#1a1a2e;">${escapeHtml(titleInput.value || 'Checklist ServiceNow')}</h1>
+            <p style="text-align:center; color:#6b7280;">${escapeHtml(projectInput.value ? 'Projeto: ' + projectInput.value : '')}</p>
+            <hr style="margin: 20px 0;">
+            <table style="width:100%; border-collapse: collapse; font-size: 14px;">
+                <thead>
+                    <tr style="background: #f3f4f6;">
+                        <th style="padding: 8px 12px; border: 1px solid #d1d5db; text-align:center;">#</th>
+                        <th style="padding: 8px 12px; border: 1px solid #d1d5db; text-align:left;">Item</th>
+                        <th style="padding: 8px 12px; border: 1px solid #d1d5db; text-align:center;">Categoria</th>
+                        <th style="padding: 8px 12px; border: 1px solid #d1d5db; text-align:center;">Status</th>
+                        <th style="padding: 8px 12px; border: 1px solid #d1d5db; text-align:left;">Observação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${items.map((item, i) => `
+                        <tr>
+                            <td style="padding: 6px 12px; border: 1px solid #d1d5db; text-align:center;">${i+1}</td>
+                            <td style="padding: 6px 12px; border: 1px solid #d1d5db;">${escapeHtml(item.description)}</td>
+                            <td style="padding: 6px 12px; border: 1px solid #d1d5db; text-align:center;">${escapeHtml(item.category || 'Geral')}</td>
+                            <td style="padding: 6px 12px; border: 1px solid #d1d5db; text-align:center;">${item.status === 'done' ? '✅ Concluído' : '⏳ Pendente'}</td>
+                            <td style="padding: 6px 12px; border: 1px solid #d1d5db;">${escapeHtml(item.obs || '')}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <hr style="margin: 20px 0;">
+            <p style="text-align:center; color:#9ca3af; font-size:12px;">Gerado em ${new Date().toLocaleString('pt-BR')}</p>
+        `;
+
+        document.body.appendChild(tempDiv);
+
+        html2pdf()
+            .set({
+                margin: 10,
+                filename: `${(titleInput.value || 'checklist').replace(/[^a-z0-9]/gi, '_')}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, letterRendering: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            })
+            .from(tempDiv)
+            .save()
+            .then(() => {
+                document.body.removeChild(tempDiv);
+            })
+            .catch(err => {
+                console.error('Erro ao gerar PDF:', err);
+                alert('Erro ao gerar PDF. Verifique o console.');
+                document.body.removeChild(tempDiv);
+            });
+    }
+
+    // ============================================================
+    //  UTILITIES
+    // ============================================================
+    function escapeHtml(text) {
+        if (!text) return '';
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // ============================================================
+    //  INIT
+    // ============================================================
+    (function init() {
+        const loaded = loadState();
+        if (!loaded || items.length === 0) {
+            loadServiceNowExample();
+        } else {
+            render();
+        }
+        titleInput.addEventListener('change', saveState);
+        projectInput.addEventListener('change', saveState);
+        document.getElementById('newItemDesc').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') addItem();
+        });
+        document.getElementById('newItemCategory').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') addItem();
+        });
+    })();
+</script>
+</body>
+</html>
